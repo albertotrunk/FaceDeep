@@ -58,11 +58,15 @@ def Backbone(backbone_type='ResNet50', use_pretrain=True):
             raise NotImplementedError(
                 'Backbone type {} is not recognized.'.format(backbone_type))
 
-        return Model(extractor.input,
-                     (extractor.layers[pick_layer1].output,
-                      extractor.layers[pick_layer2].output,
-                      extractor.layers[pick_layer3].output),
-                     name=backbone_type + '_extrator')(preprocess(x))
+        return Model(
+            extractor.input,
+            (
+                extractor.layers[pick_layer1].output,
+                extractor.layers[pick_layer2].output,
+                extractor.layers[pick_layer3].output,
+            ),
+            name=f'{backbone_type}_extrator',
+        )(preprocess(x))
 
     return backbone
 
@@ -84,8 +88,7 @@ class ConvUnit(tf.keras.layers.Layer):
         elif act == 'lrelu':
             self.act_fn = LeakyReLU(0.1)
         else:
-            raise NotImplementedError(
-                'Activation function type {} is not recognized.'.format(act))
+            raise NotImplementedError(f'Activation function type {act} is not recognized.')
 
     def call(self, x):
         return self.act_fn(self.bn(self.conv(x)))
@@ -95,12 +98,9 @@ class FPN(tf.keras.layers.Layer):
     """Feature Pyramid Network"""
     def __init__(self, out_ch, wd, **kwargs):
         super(FPN, self).__init__(**kwargs)
-        act = 'relu'
         self.out_ch = out_ch
         self.wd = wd
-        if (out_ch <= 64):
-            act = 'lrelu'
-
+        act = 'lrelu' if (out_ch <= 64) else 'relu'
         self.output1 = ConvUnit(f=out_ch, k=1, s=1, wd=wd, act=act)
         self.output2 = ConvUnit(f=out_ch, k=1, s=1, wd=wd, act=act)
         self.output3 = ConvUnit(f=out_ch, k=1, s=1, wd=wd, act=act)
@@ -140,10 +140,7 @@ class SSH(tf.keras.layers.Layer):
         assert out_ch % 4 == 0
         self.out_ch = out_ch
         self.wd = wd
-        act = 'relu'
-        if (out_ch <= 64):
-            act = 'lrelu'
-
+        act = 'lrelu' if (out_ch <= 64) else 'relu'
         self.conv_3x3 = ConvUnit(f=out_ch // 2, k=3, s=1, wd=wd, act=None)
 
         self.conv_5x5_1 = ConvUnit(f=out_ch // 4, k=3, s=1, wd=wd, act=act)
@@ -262,12 +259,11 @@ def RetinaFaceModel(cfg, training=False, iou_th=0.4, score_th=0.02,
 
     fpn = FPN(out_ch=out_ch, wd=wd)(x)
 
-    features = [SSH(out_ch=out_ch, wd=wd)(f)
-                for i, f in enumerate(fpn)]
+    features = [SSH(out_ch=out_ch, wd=wd)(f) for f in fpn]
 
     bbox_regressions = tf.concat(
-        [BboxHead(num_anchor, wd=wd)(f)
-         for i, f in enumerate(features)], axis=1)
+        [BboxHead(num_anchor, wd=wd)(f) for f in features], axis=1
+    )
     landm_regressions = tf.concat(
         [LandmarkHead(num_anchor, wd=wd, name=f'LandmarkHead_{i}')(f)
          for i, f in enumerate(features)], axis=1)
@@ -298,4 +294,8 @@ def RetinaFaceModel(cfg, training=False, iou_th=0.4, score_th=0.02,
 
         out = tf.gather(decode_preds, selected_indices)
 
-    return Model(inputs, out, name=name), Model(inputs, [bbox_regressions, landm_regressions, classifications], name=name + '_bb_only')
+    return Model(inputs, out, name=name), Model(
+        inputs,
+        [bbox_regressions, landm_regressions, classifications],
+        name=f'{name}_bb_only',
+    )

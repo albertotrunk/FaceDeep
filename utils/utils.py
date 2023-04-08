@@ -284,8 +284,7 @@ def norm_crop(img, landmark, image_size=112, mode='arcface', shrink_factor=1.0):
     :return: Returns the transformed image.
     """
     M, pose_index = estimate_norm(landmark, image_size, mode, shrink_factor=shrink_factor)
-    warped = cv2.warpAffine(img, M, (image_size, image_size), borderValue=0.0)
-    return warped
+    return cv2.warpAffine(img, M, (image_size, image_size), borderValue=0.0)
 
 
 def transform_landmark_points(M, points):
@@ -311,7 +310,7 @@ def multi_convolver(image, kernel, iterations):
         kernel = (1 / 16.0) * np.array([[1., 2., 1.],
                                         [2., 4., 2.],
                                         [1., 2., 1.]])
-    for i in range(iterations):
+    for _ in range(iterations):
         image = convolve2d(image, kernel, 'same', boundary='fill', fillvalue = 0)
     return image
 
@@ -366,10 +365,13 @@ def display_distance_text(im, distance, lms, im_w, im_h, scale=2):
 
 
 def get_lm(annotation, im_w, im_h):
-    lm_align = np.array([[annotation[4] * im_w, annotation[5] * im_h],
-                         [annotation[6] * im_w, annotation[7] * im_h],
-                         [annotation[8] * im_w, annotation[9] * im_h],
-                         [annotation[10] * im_w, annotation[11] * im_h],
-                         [annotation[12] * im_w, annotation[13] * im_h]],
-                        dtype=np.float32)
-    return lm_align
+    return np.array(
+        [
+            [annotation[4] * im_w, annotation[5] * im_h],
+            [annotation[6] * im_w, annotation[7] * im_h],
+            [annotation[8] * im_w, annotation[9] * im_h],
+            [annotation[10] * im_w, annotation[11] * im_h],
+            [annotation[12] * im_w, annotation[13] * im_h],
+        ],
+        dtype=np.float32,
+    )

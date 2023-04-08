@@ -21,7 +21,5 @@ def extract_detections(bbox_regressions, landm_regressions, classifications, ima
         iou_threshold=iou_th,
         score_threshold=score_th)
 
-    out = tf.gather(decode_preds, selected_indices)
-
-    return out
+    return tf.gather(decode_preds, selected_indices)
 

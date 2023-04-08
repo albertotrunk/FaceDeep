@@ -20,11 +20,7 @@ def run_inference(opt, source, target, RetinaFace,
                   ArcFace, FaceDancer, result_img_path, source_z=None):
     try:
 
-        if not isinstance(target, str):
-            target = target
-        else:
-            target = cv2.imread(target)
-
+        target = cv2.imread(target) if isinstance(target, str) else target
         target = np.array(target)
 
         if source_z is None:
@@ -91,11 +87,7 @@ def run_inference(opt, source, target, RetinaFace,
 def video_swap(opt, face, input_video, RetinaFace, ArcFace, FaceDancer, out_video_filename):
     video_forcheck = VideoFileClip(input_video)
 
-    if video_forcheck.audio is None:
-        no_audio = True
-    else:
-        no_audio = False
-
+    no_audio = video_forcheck.audio is None
     del video_forcheck
 
     if not no_audio:
@@ -134,11 +126,11 @@ def video_swap(opt, face, input_video, RetinaFace, ArcFace, FaceDancer, out_vide
     if out_video_filename.lower().endswith('.gif'):
         print("\nCreating GIF with FFmpeg...")
         try:
-           subprocess.run('ffmpeg -y -v -8 -f image2 -framerate {} \
+            subprocess.run('ffmpeg -y -v -8 -f image2 -framerate {} \
                -i "./tmp_frames/frame_%07d.png" -filter_complex "[0:v]split [a][b];[a] \
                    palettegen=stats_mode=single [p];[b][p]paletteuse=dither=bayer:bayer_scale=4" \
                        -y "{}.gif"'.format(fps, name), shell=True, check=True)
-           print("\nGIF created: {}".format(out_video_filename))
+            print(f"\nGIF created: {out_video_filename}")
 
         except subprocess.CalledProcessError:
             print("\nERROR! Failed to export GIF with FFmpeg")
@@ -151,7 +143,7 @@ def video_swap(opt, face, input_video, RetinaFace, ArcFace, FaceDancer, out_vide
             subprocess.run('ffmpeg -y -v -8 -f image2 -framerate {} \
                 -i "./tmp_frames/frame_%07d.png" -vcodec libwebp -lossless 0 -q:v 80 -loop 0 -an -vsync 0 \
                     "{}.webp"'.format(fps, name), shell=True, check=True)
-            print("\nWEBP created: {}".format(out_video_filename))
+            print(f"\nWEBP created: {out_video_filename}")
 
         except subprocess.CalledProcessError:
             print("\nERROR! Failed to export WEBP with FFmpeg")
@@ -168,4 +160,4 @@ def video_swap(opt, face, input_video, RetinaFace, ArcFace, FaceDancer, out_vide
             print('\n', e)
             sys.exit(0)
 
-        print('\nDone! {}'.format(out_video_filename))
+        print(f'\nDone! {out_video_filename}')

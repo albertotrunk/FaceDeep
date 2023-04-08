@@ -202,8 +202,7 @@ class AdaptiveAttention(Layer):
         return (1 - m) * a + m * i
 
     def get_config(self):
-        base_config = super(AdaptiveAttention, self).get_config()
-        return base_config
+        return super(AdaptiveAttention, self).get_config()
 
 
 def aad_block(inputs, c_out):
@@ -236,9 +235,7 @@ def aad_block(inputs, c_out):
     i = Multiply()([h_norm, z_id_gamma])
     i = Add()([i, z_id_beta])
 
-    h_out = AdaptiveAttention()([m, a, i])
-
-    return h_out
+    return AdaptiveAttention()([m, a, i])
 
 
 def aad_block_mod(inputs, c_out):
@@ -269,9 +266,7 @@ def aad_block_mod(inputs, c_out):
                   kernel_initializer='he_uniform',
                   kernel_regularizer=tf.keras.regularizers.l1(l1=0.0001))([h_norm, z_id_gamma])
 
-    h_out = AdaptiveAttention()([m, a, i])
-
-    return h_out
+    return AdaptiveAttention()([m, a, i])
 
 
 def aad_res_block(inputs, c_in, c_out):
@@ -292,8 +287,7 @@ def aad_res_block(inputs, c_in, c_out):
                       padding='same',
                       kernel_regularizer=tf.keras.regularizers.l1(l1=0.001))(act)
 
-        h_out = Add()([h, conv])
-        return h_out
+        return Add()([h, conv])
     else:
         aad = aad_block([h, z_att, z_id], c_in)
         act = ReLU()(aad)
@@ -316,9 +310,7 @@ def aad_res_block(inputs, c_in, c_out):
                       padding='same',
                       kernel_regularizer=tf.keras.regularizers.l1(l1=0.001))(act)
 
-        h_out = Add()([h_res, conv])
-
-        return h_out
+        return Add()([h_res, conv])
 
 
 def aad_res_block_mod(inputs, c_in, c_out):
@@ -340,8 +332,7 @@ def aad_res_block_mod(inputs, c_in, c_out):
                       padding='same',
                       kernel_regularizer=tf.keras.regularizers.l1(l1=0.0001))(act)
 
-        h_out = Add()([h, conv])
-        return h_out
+        return Add()([h, conv])
     else:
         aad = aad_block_mod([h, z_att, z_id], c_in)
         act = ReLU()(aad)
@@ -364,7 +355,5 @@ def aad_res_block_mod(inputs, c_in, c_out):
                       padding='same',
                       kernel_regularizer=tf.keras.regularizers.l1(l1=0.0001))(act)
 
-        h_out = Add()([h_res, conv])
-
-        return h_out
+        return Add()([h_res, conv])
 

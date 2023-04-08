@@ -62,9 +62,7 @@ if __name__ == '__main__':
     images_list = []
 
     for fld in tqdm(folder_list):
-        for im in os.listdir(data_path + fld):
-            images_list.append(fld + '/' + im)
-
+        images_list.extend(f'{fld}/{im}' for im in os.listdir(data_path + fld))
     if opt.shuffle:
         random.shuffle(images_list)
     index = 0
