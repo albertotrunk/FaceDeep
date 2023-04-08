@@ -43,19 +43,19 @@ def test_api():
 def generate(content_image: UploadFile = File(...), target_image: UploadFile = File(...)):
     os.makedirs('./results', exist_ok=True)
     os.system('rm -rf ./results/*')
-    
+
     # save cnotent image file
     input_image_file_path1 = f"./source_image/{content_image.filename}"
     with open(input_image_file_path1, "wb") as buffer:
         shutil.copyfileobj(content_image.file, buffer)
-    
+
     # save target image file
     input_image_file_path2 = f"./swap_image/{target_image.filename}"
     with open(input_image_file_path2, "wb") as buffer:
         shutil.copyfileobj(target_image.file, buffer)
-    
-    print('\nProcessing: {}'.format(opt.img_path))
+
+    print(f'\nProcessing: {opt.img_path}')
     run_inference(opt, input_image_file_path1, input_image_file_path2, RetinaFace, ArcFace, G, opt.img_output)
-    print('\nDone! {}'.format(opt.img_output))
+    print(f'\nDone! {opt.img_output}')
     
 uvicorn.run(app, host='0.0.0.0', port=8000)

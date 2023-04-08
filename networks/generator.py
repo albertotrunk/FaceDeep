@@ -54,9 +54,7 @@ def adaptive_attention(inputs, filters, name=None):
     m = InstanceNormalization()(m)
     m = Conv2D(filters=filters, kernel_size=1, strides=1, padding='same', activation='sigmoid', name=name)(m)
 
-    x = AdaptiveAttention()([m, x_t, x_s])
-
-    return x
+    return AdaptiveAttention()([m, x_t, x_s])
 
 
 def adaptive_attention_double(inputs, filters, name=None):
@@ -67,7 +65,14 @@ def adaptive_attention_double(inputs, filters, name=None):
     m_hat = Conv2D(filters=filters, kernel_size=3, strides=1, padding='same')(c)
     m_hat = LeakyReLU(0.2)(m_hat)
     m_hat = InstanceNormalization()(m_hat)
-    m_hat = Conv2D(filters=1, kernel_size=1, strides=1, padding='same', activation='sigmoid', name=name + '_hat')(m_hat)
+    m_hat = Conv2D(
+        filters=1,
+        kernel_size=1,
+        strides=1,
+        padding='same',
+        activation='sigmoid',
+        name=f'{name}_hat',
+    )(m_hat)
 
     m = Conv2D(filters=filters, kernel_size=3, strides=1, padding='same')(c)
     m = LeakyReLU(0.2)(m)
@@ -76,9 +81,7 @@ def adaptive_attention_double(inputs, filters, name=None):
 
     m_hat = m * m_hat
 
-    x = AdaptiveAttention()([m_hat, x_t, x_s])
-
-    return x
+    return AdaptiveAttention()([m_hat, x_t, x_s])
 
 
 def adaptive_fusion_up_block(inputs, filters, resample=True, name=None):
@@ -128,8 +131,8 @@ def adaptive_fusion_up_block_double(inputs, filters, resample=True, name=None):
 def dual_adaptive_fusion_up_block(inputs, filters, resample=True, name=None):
     x_t, x_s, z_id = inputs
 
-    x = adaptive_attention([x_t, x_s], x_t.shape[-1], name=name + '_0')
-    x = adaptive_attention([x_t, x], x_t.shape[-1], name=name + '_1')
+    x = adaptive_attention([x_t, x_s], x_t.shape[-1], name=f'{name}_0')
+    x = adaptive_attention([x_t, x], x_t.shape[-1], name=f'{name}_1')
 
     r = Conv2D(filters=filters, kernel_size=1, strides=1, padding='same')(x)
     if resample:
@@ -219,7 +222,7 @@ def get_generator(up_types=None, mapping_depth=4, mapping_size=256):
 
     # build mapping network M
     z_id = z_source
-    for m in range(np.max([mapping_depth - 1, 0])):
+    for _ in range(np.max([mapping_depth - 1, 0])):
         z_id = Dense(mapping_size)(z_id)
         z_id = LeakyReLU(0.2)(z_id)
     if mapping_depth >= 1:

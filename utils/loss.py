@@ -102,9 +102,13 @@ def perceptual_similarity_backbone(feature_layers, path):
     extractor = load_model(path).layers[1]
     extractor.trainable = False
 
-    backbone = Model(extractor.input, [extractor.get_layer(layer_name).output for layer_name in feature_layers])
-
-    return backbone
+    return Model(
+        extractor.input,
+        [
+            extractor.get_layer(layer_name).output
+            for layer_name in feature_layers
+        ],
+    )
 
 
 def perceptual_similarity_loss(blocks, block_weights, block_margin, path):

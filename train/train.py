@@ -57,8 +57,8 @@ def run(opt):
         os.mkdir(opt.chkp_dir + opt.log_name + "/dis")
         os.mkdir(opt.chkp_dir + opt.log_name + "/gen")
         os.mkdir(opt.chkp_dir + opt.log_name + "/state")
-    if not os.path.isdir("../config/" + opt.log_name):
-        os.mkdir("../config/" + opt.log_name)
+    if not os.path.isdir(f"../config/{opt.log_name}"):
+        os.mkdir(f"../config/{opt.log_name}")
 
     print("[*] begin training...")
     iteration = 0
@@ -66,7 +66,7 @@ def run(opt):
 
     # load checkpoint
     if opt.load is not None:
-        print("[*] loading checkpoint " + str(opt.load) + "...")
+        print(f"[*] loading checkpoint {str(opt.load)}...")
         G = load_model_internal(opt.chkp_dir + opt.log_name + "/gen/", "gen", opt.load)
         D = load_model_internal(opt.chkp_dir + opt.log_name + "/dis/", "dis", opt.load)
 
@@ -75,20 +75,20 @@ def run(opt):
         epoch_s = checkpoint_state["epoch"]
         iteration = checkpoint_state["iteration"] + 1
 
-        print("[*] continuing at iteration " + str(iteration) + "...")
+        print(f"[*] continuing at iteration {iteration}...")
 
         # export the model to .h5 and exit
         if opt.export:
             print('exporting G to h5...')
-            if not os.path.isdir('../exports/' + opt.log_name):
-                os.mkdir('../exports/' + opt.log_name)
-            G.save('../exports/' + opt.log_name + '/facedancer_' + str(opt.load) + '.h5')
+            if not os.path.isdir(f'../exports/{opt.log_name}'):
+                os.mkdir(f'../exports/{opt.log_name}')
+            G.save(f'../exports/{opt.log_name}/facedancer_{str(opt.load)}.h5')
 
             exit()
 
     # save options
-    date = datetime.today().strftime('%Y_%m_%d_%H_%M')
-    with open('../config/' + opt.log_name + '/options_' + date + '.txt', 'w') as f:
+    date = datetime.now().strftime('%Y_%m_%d_%H_%M')
+    with open(f'../config/{opt.log_name}/options_{date}.txt', 'w') as f:
         json.dump(opt.__dict__, f, indent=2)
 
     # prepare learning rate schedule and optimizers
@@ -238,7 +238,12 @@ def run(opt):
 
         # log images to tensorboard
         with sw.as_default():
-            tf.summary.image(category + 'samples', np.expand_dims(c1, axis=0), step=iteration, max_outputs=10)
+            tf.summary.image(
+                f'{category}samples',
+                np.expand_dims(c1, axis=0),
+                step=iteration,
+                max_outputs=10,
+            )
 
     # if exporting the model, skip creating summary writer
     if not opt.export:

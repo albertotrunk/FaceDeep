@@ -39,7 +39,7 @@ if __name__ == '__main__':
                                    "InstanceNormalization": InstanceNormalization})
     G.summary()
 
-    print('\nProcessing: {}'.format(opt.img_path))
+    print(f'\nProcessing: {opt.img_path}')
     run_inference(opt, opt.swap_source, opt.img_path,
                   RetinaFace, ArcFace, G, opt.img_output)
-    print('\nDone! {}'.format(opt.img_output))
+    print(f'\nDone! {opt.img_output}')

@@ -287,10 +287,13 @@ def _decode_landm(pre, priors, variances=[0.1, 0.2]):
     Return:
         decoded landm predictions
     """
-    landms = tf.concat(
-        [priors[:, :2] + pre[:, :2] * variances[0] * priors[:, 2:],
-         priors[:, :2] + pre[:, 2:4] * variances[0] * priors[:, 2:],
-         priors[:, :2] + pre[:, 4:6] * variances[0] * priors[:, 2:],
-         priors[:, :2] + pre[:, 6:8] * variances[0] * priors[:, 2:],
-         priors[:, :2] + pre[:, 8:10] * variances[0] * priors[:, 2:]], axis=1)
-    return landms
+    return tf.concat(
+        [
+            priors[:, :2] + pre[:, :2] * variances[0] * priors[:, 2:],
+            priors[:, :2] + pre[:, 2:4] * variances[0] * priors[:, 2:],
+            priors[:, :2] + pre[:, 4:6] * variances[0] * priors[:, 2:],
+            priors[:, :2] + pre[:, 6:8] * variances[0] * priors[:, 2:],
+            priors[:, :2] + pre[:, 8:10] * variances[0] * priors[:, 2:],
+        ],
+        axis=1,
+    )
